@@ -62,6 +62,23 @@
         .product-desc {
             font-size: 0.9rem;
             color: #aaa;
+            margin-bottom: 15px;
+        }
+        .btn-whatsapp {
+            display: block;
+            width: 100%;
+            background-color: #25d366;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+        .btn-whatsapp:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -83,6 +100,11 @@
                     {% if prod.descripcion %}
                         <div class="product-desc">{{ prod.descripcion }}</div>
                     {% endif %}
+                    
+                    <!-- Botón para pedir por WhatsApp con el mensaje personalizado -->
+                    <a href="https://api.whatsapp.com/send?phone={{ config.telefono_whatsapp }}&text=Hola,%20me%20interesa%20el%20producto:%20{{ prod.nombre }}%20(${% if prod.precio %}{{ prod.precio }}{% endif %})" target="_blank" class="btn-whatsapp">
+                        💬 Pedir por WhatsApp
+                    </a>
                 </div>
             </div>
             {% endfor %}
