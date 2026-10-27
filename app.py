@@ -47,39 +47,40 @@ def index():
     productos = Producto.query.all()
     return render_template('panel.html', config=config, productos=productos)
 
-@app.route('/agregar', methods=['POST'])
+@app.route('/agregar', methods=['GET', 'POST'])
 def agregar():
-    try:
-        config = cargar_config()
-        nombre_negocio = config.get("nombre_negocio", "default")
-        nombre_carpeta = ''.join(c if c.isalnum() else '_' for c in nombre_negocio.lower())
-        
-        upload_folder = os.path.join(app.root_path, 'static', 'uploads', nombre_carpeta)
-        os.makedirs(upload_folder, exist_ok=True)
-
-        nombre = request.form.get('nombre')
-        precio = request.form.get('precio')
-        descripcion = request.form.get('descripcion')
-        imagen_file = request.files.get('imagen')
-        
-        imagen_path = None
-        if imagen_file and imagen_file.filename != '':
-            filename = secure_filename(imagen_file.filename)
-            file_path = os.path.join(upload_folder, filename)
-            imagen_file.save(file_path)
-            imagen_path = f'uploads/{nombre_carpeta}/{filename}'
+    if request.method == 'POST':
+        try:
+            config = cargar_config()
+            nombre_negocio = config.get("nombre_negocio", "default")
+            nombre_carpeta = ''.join(c if c.isalnum() else '_' for c in nombre_negocio.lower())
             
-        nuevo_prod = Producto(
-            nombre=nombre,
-            precio=float(precio) if precio else 0.0,
-            descripcion=descripcion,
-            imagen=imagen_path
-        )
-        db.session.add(nuevo_prod)
-        db.session.commit()
-    except Exception as e:
-        print(f"ERROR CRÍTICO AL AGREGAR: {e}")
-        
+            upload_folder = os.path.join(app.root_path, 'static', 'uploads', nombre_carpeta)
+            os.makedirs(upload_folder, exist_ok=True)
+
+            nombre = request.form.get('nombre')
+            precio = request.form.get('precio')
+            descripcion = request.form.get('descripcion')
+            imagen_file = request.files.get('imagen')
+            
+            imagen_path = None
+            if imagen_file and imagen_file.filename != '':
+                filename = secure_filename(imagen_file.filename)
+                file_path = os.path.join(upload_folder, filename)
+                imagen_file.save(file_path)
+                imagen_path = f'uploads/{nombre_carpeta}/{filename}'
+                
+            nuevo_prod = Producto(
+                nombre=nombre,
+                precio=float(precio) if precio else 0.0,
+                descripcion=descripcion,
+                imagen=imagen_path
+            )
+            db.session.add(nuevo_prod)
+            db.session.commit()
+        except Exception as e:
+            print(f"ERROR CRÍTICO AL AGREGAR: {e}")
+            
     return redirect(url_for('index'))
 
 @app.route('/eliminar/<int:id>', methods=['POST'])
