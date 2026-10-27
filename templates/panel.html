@@ -99,23 +99,6 @@
         .btn-submit:hover {
             opacity: 0.9;
         }
-        .color-box {
-            background-color: #2a2a2a;
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-        .color-box input[type="color"] {
-            border: none;
-            width: 40px;
-            height: 30px;
-            background: none;
-            cursor: pointer;
-        }
         .product-item {
             background-color: #2a2a2a;
             padding: 10px;
@@ -149,23 +132,10 @@
         <h1>🏷️ {{ config.nombre_negocio }}</h1>
         <div class="subtitle">Panel de Control y Administración</div>
 
-        <!-- CONFIGURACIÓN DE COLOR EN TIEMPO REAL -->
-        <form action="/actualizar_config" method="POST" class="color-box">
-            <div>
-                <label style="margin:0;">Color del Negocio:</label>
-                <small style="color:#777;">Cambia la identidad visual</small>
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="color" name="color_primario" value="{{ config.color_primario }}">
-                <button type="submit" style="background: {{ config.color_primario }}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size:0.85rem;">Aplicar</button>
-            </div>
-        </form>
-
         <!-- SECCIÓN DE CÓDIGO QR -->
         <div class="card-qr">
             <h3 style="margin: 0 0 10px 0; font-size: 1rem; color: #ddd;">📱 Código QR del Negocio</h3>
             <p style="font-size: 0.8rem; color: #888; margin: 0;">Escanea para abrir el catálogo digital:</p>
-            <!-- QR generado dinámicamente -->
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://qr-catalogo-maestro-jenopro.onrender.com/catalogo" alt="QR Catálogo">
             <div>
                 <a href="/catalogo" target="_blank" class="btn-link">🔗 Abrir Catálogo Público</a>
@@ -176,13 +146,13 @@
         <div class="section-title">+ Agregar Producto / Artículo</div>
         <form action="/agregar" method="POST" enctype="multipart/form-data">
             <label for="nombre">Nombre del producto</label>
-            <input type="text" id="nombre" name="nombre" required placeholder="Ej. Perfume Sauvage / Tacos Asada">
+            <input type="text" id="nombre" name="nombre" required placeholder="Ej. Perfume Sauvage">
 
             <label for="precio">Precio ($ MXN)</label>
             <input type="number" step="0.01" id="precio" name="precio" required placeholder="Ej. 350.00">
 
             <label for="descripcion">Descripción corta</label>
-            <textarea id="descripcion" name="descripcion" rows="2" placeholder="Detalles o ingredientes..."></textarea>
+            <textarea id="descripcion" name="descripcion" rows="2" placeholder="Detalles..."></textarea>
 
             <label for="imagen">Foto del producto (Galería)</label>
             <input type="file" id="imagen" name="imagen" accept="image/*">
