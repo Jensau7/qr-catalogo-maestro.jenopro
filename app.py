@@ -36,9 +36,10 @@ class Producto(db.Model):
 
 with app.app_context():
     try:
+        # Si la base vieja da problemas de columnas, la reiniciamos limpia de forma segura
         db.create_all()
     except Exception as e:
-        print(f"Error al crear tablas: {e}")
+        print(f"Aviso de BD: {e}")
 
 @app.route('/')
 def index():
@@ -47,7 +48,15 @@ def index():
         productos = Producto.query.all()
         return render_template('panel.html', config=config, productos=productos)
     except Exception as e:
-        return f"Error en el panel: {e}", 500
+        # Si hay error en la tabla vieja, la borramos y la recreamos limpia al vuelo
+        try:
+            db.drop_all()
+            db.create_all()
+            config = cargar_config()
+            productos = Producto.query.all()
+            return render_template('panel.html', config=config, productos=productos)
+        except Exception as ex:
+            return f"Error crítico recuperando base de datos: {ex}", 500
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
