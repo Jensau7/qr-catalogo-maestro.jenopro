@@ -64,7 +64,6 @@
             color: #aaa;
             margin-bottom: 15px;
         }
-        /* Estilos para el selector de cantidad */
         .quantity-container {
             display: flex;
             align-items: center;
@@ -93,9 +92,6 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 1rem;
-        }
-        .qty-btn:active {
-            background-color: {{ config.color_primario }};
         }
         .qty-input {
             width: 35px;
@@ -135,7 +131,7 @@
             {% for prod in productos %}
             <div class="product-card">
                 {% if prod.imagen %}
-                    <img src="{{ url_for('static', filename=prod.imagen) }}" alt="{{ prod.nombre }}">
+                    <img src="{{ prod.imagen }}" alt="{{ prod.nombre }}">
                 {% endif %}
                 <div class="product-details">
                     <div class="product-title">{{ prod.nombre }}</div>
@@ -144,9 +140,8 @@
                     </div>
                     {% if prod.descripcion %}
                         <div class="product-desc">{{ prod.descripcion }}</div>
-                    {% endif %}
+                    @endif
                     
-                    <!-- Selector de Cantidad -->
                     <div class="quantity-container">
                         <label for="qty-{{ prod.id }}">Cantidad:</label>
                         <div class="quantity-controls">
@@ -156,7 +151,6 @@
                         </div>
                     </div>
 
-                    <!-- Botón dinámico de WhatsApp -->
                     <a href="#" id="whatsapp-btn-{{ prod.id }}" 
                        data-nombre="{{ prod.nombre }}" 
                        data-precio="{{ prod.precio }}" 
