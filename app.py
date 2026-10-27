@@ -51,25 +51,22 @@ def index():
     productos = Producto.query.all()
     return render_template('panel.html', config=config, productos=productos)
 
-# NUEVA RUTA: Para actualizar la configuración (incluyendo el color) desde la página
-@app.route('/actualizar_config', methods=['POST'])
+# Ruta blindada para actualizar la configuración sin errores de método
+@app.route('/actualizar_config', methods=['GET', 'POST'])
 def actualizar_config():
-    nuevo_color = request.form.get('color_primario')
-    
-    # Leemos la configuración actual
-    config = cargar_config()
-    
-    # Actualizamos el color si el usuario eligió uno nuevo
-    if nuevo_color:
-        config['color_primario'] = nuevo_color
+    if request.method == 'POST':
+        nuevo_color = request.form.get('color_primario')
+        config = cargar_config()
         
-    # Guardamos los cambios de vuelta en el archivo config.json
-    try:
-        with open('config.json', 'w', encoding='utf-8') as f:
-            json.dump(config, f, ensure_ascii=False, indent=4)
-    except Exception as e:
-        print(f"Error guardando config.json: {e}")
-        
+        if nuevo_color:
+            config['color_primario'] = nuevo_color
+            
+        try:
+            with open('config.json', 'w', encoding='utf-8') as f:
+                json.dump(config, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Error guardando config.json: {e}")
+            
     return redirect(url_for('index'))
 
 @app.route('/agregar', methods=['POST'])
