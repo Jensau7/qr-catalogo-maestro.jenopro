@@ -49,12 +49,13 @@ with app.app_context():
 def index():
     config = cargar_config()
     productos = Producto.query.all()
+    # Le pasamos el config completo para que el HTML use config.color_primario
     return render_template('panel.html', config=config, productos=productos)
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
     config = cargar_config()
-    # Limpiamos el nombre del negocio para usarlo como carpeta segura (ej. "Perfumes Europeos" -> "perfumes_europeos")
+    # Limpiamos el nombre del negocio para usarlo como carpeta segura
     nombre_carpeta = ''.join(c if c.isalnum() else '_' for c in config.get("nombre_negocio", "default").lower())
     
     upload_folder = os.path.join(app.config['BASE_UPLOAD_FOLDER'], nombre_carpeta)
@@ -69,7 +70,6 @@ def agregar():
     if imagen_file and imagen_file.filename != '':
         filename = secure_filename(imagen_file.filename)
         imagen_file.save(os.path.join(upload_folder, filename))
-        # Guardamos la ruta relativa incluyendo la subcarpeta del negocio
         imagen_path = f'uploads/{nombre_carpeta}/{filename}'
         
     try:
@@ -89,7 +89,6 @@ def agregar():
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     prod = Producto.query.get_or_404(id)
-    # Opcional: si quieres borrar el archivo físico de la imagen al eliminar el producto
     if prod.imagen:
         try:
             ruta_fisica = os.path.join('static', prod.imagen)
@@ -106,6 +105,7 @@ def eliminar(id):
 def catalogo():
     config = cargar_config()
     productos = Producto.query.all()
+    # Le pasamos el config completo para que el catálogo público también pinte del color correcto
     return render_template('catalogo.html', config=config, productos=productos)
 
 if __name__ == '__main__':
