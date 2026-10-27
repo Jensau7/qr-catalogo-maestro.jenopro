@@ -49,13 +49,32 @@ with app.app_context():
 def index():
     config = cargar_config()
     productos = Producto.query.all()
-    # Le pasamos el config completo para que el HTML use config.color_primario
     return render_template('panel.html', config=config, productos=productos)
+
+# NUEVA RUTA: Para actualizar la configuración (incluyendo el color) desde la página
+@app.route('/actualizar_config', methods=['POST'])
+def actualizar_config():
+    nuevo_color = request.form.get('color_primario')
+    
+    # Leemos la configuración actual
+    config = cargar_config()
+    
+    # Actualizamos el color si el usuario eligió uno nuevo
+    if nuevo_color:
+        config['color_primario'] = nuevo_color
+        
+    # Guardamos los cambios de vuelta en el archivo config.json
+    try:
+        with open('config.json', 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"Error guardando config.json: {e}")
+        
+    return redirect(url_for('index'))
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
     config = cargar_config()
-    # Limpiamos el nombre del negocio para usarlo como carpeta segura
     nombre_carpeta = ''.join(c if c.isalnum() else '_' for c in config.get("nombre_negocio", "default").lower())
     
     upload_folder = os.path.join(app.config['BASE_UPLOAD_FOLDER'], nombre_carpeta)
@@ -105,7 +124,6 @@ def eliminar(id):
 def catalogo():
     config = cargar_config()
     productos = Producto.query.all()
-    # Le pasamos el config completo para que el catálogo público también pinte del color correcto
     return render_template('catalogo.html', config=config, productos=productos)
 
 if __name__ == '__main__':
