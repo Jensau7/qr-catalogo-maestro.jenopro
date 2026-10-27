@@ -32,7 +32,7 @@ class Producto(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
     descripcion = db.Column(db.Text, nullable=True)
-    imagen = db.Column(db.Text, nullable=True) # Aquí guardaremos la URL directa de la imagen
+    imagen = db.Column(db.Text, nullable=True)
 
 with app.app_context():
     db.create_all()
@@ -50,7 +50,7 @@ def agregar():
             nombre = request.form.get('nombre')
             precio = request.form.get('precio')
             descripcion = request.form.get('descripcion')
-            imagen_url = request.form.get('imagen') # Recibimos la URL directa por texto
+            imagen_url = request.form.get('imagen')
             
             nuevo_prod = Producto(
                 nombre=nombre,
