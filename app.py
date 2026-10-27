@@ -21,12 +21,13 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Función para cargar la configuración del negocio (nombre, giro, whatsapp y color)
+# Función que lee directamente el archivo config.json en tiempo real
 def cargar_config():
     try:
         with open('config.json', 'r', encoding='utf-8') as f:
             return json.load(f)
-    except Exception:
+    except Exception as e:
+        print(f"Error leyendo config.json: {e}")
         return {
             "nombre_negocio": "Catálogo Digital",
             "giro": "Negocio Local",
