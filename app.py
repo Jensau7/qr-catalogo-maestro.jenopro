@@ -41,22 +41,9 @@ class Producto(db.Model):
 with app.app_context():
     db.create_all()
 
-# Ruta principal que maneja tanto la vista como la actualización de color por POST
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
     config = cargar_config()
-    
-    if request.method == 'POST':
-        nuevo_color = request.form.get('color_primario')
-        if nuevo_color:
-            config['color_primario'] = nuevo_color
-            try:
-                with open('config.json', 'w', encoding='utf-8') as f:
-                    json.dump(config, f, ensure_ascii=False, indent=4)
-            except Exception as e:
-                print(f"Error guardando config.json: {e}")
-        return redirect(url_for('index'))
-
     productos = Producto.query.all()
     return render_template('panel.html', config=config, productos=productos)
 
