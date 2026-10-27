@@ -35,48 +35,59 @@ class Producto(db.Model):
     imagen = db.Column(db.Text, nullable=True)
 
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Error al crear tablas: {e}")
 
 @app.route('/')
 def index():
-    config = cargar_config()
-    productos = Producto.query.all()
-    return render_template('panel.html', config=config, productos=productos)
+    try:
+        config = cargar_config()
+        productos = Producto.query.all()
+        return render_template('panel.html', config=config, productos=productos)
+    except Exception as e:
+        return f"Error en el panel: {e}", 500
 
-@app.route('/agregar', methods=['GET', 'POST'])
+@app.route('/agregar', methods=['POST'])
 def agregar():
-    if request.method == 'POST':
-        try:
-            nombre = request.form.get('nombre')
-            precio = request.form.get('precio')
-            descripcion = request.form.get('descripcion')
-            imagen_url = request.form.get('imagen')
-            
-            nuevo_prod = Producto(
-                nombre=nombre,
-                precio=float(precio) if precio else 0.0,
-                descripcion=descripcion,
-                imagen=imagen_url
-            )
-            db.session.add(nuevo_prod)
-            db.session.commit()
-        except Exception as e:
-            print(f"ERROR CRÍTICO AL AGREGAR: {e}")
-            
+    try:
+        nombre = request.form.get('nombre')
+        precio = request.form.get('precio')
+        descripcion = request.form.get('descripcion')
+        imagen_url = request.form.get('imagen')
+        
+        nuevo_prod = Producto(
+            nombre=nombre,
+            precio=float(precio) if precio else 0.0,
+            descripcion=descripcion,
+            imagen=imagen_url
+        )
+        db.session.add(nuevo_prod)
+        db.session.commit()
+    except Exception as e:
+        print(f"ERROR AL AGREGAR: {e}")
+        
     return redirect(url_for('index'))
 
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
-    prod = Producto.query.get_or_404(id)
-    db.session.delete(prod)
-    db.session.commit()
+    try:
+        prod = Producto.query.get_or_404(id)
+        db.session.delete(prod)
+        db.session.commit()
+    except Exception as e:
+        print(f"ERROR AL ELIMINAR: {e}")
     return redirect(url_for('index'))
 
 @app.route('/catalogo')
 def catalogo():
-    config = cargar_config()
-    productos = Producto.query.all()
-    return render_template('catalogo.html', config=config, productos=productos)
+    try:
+        config = cargar_config()
+        productos = Producto.query.all()
+        return render_template('catalogo.html', config=config, productos=productos)
+    except Exception as e:
+        return f"Error en catálogo: {e}", 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
