@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Configuración de la base de datos (SQLite por defecto o PostgreSQL si está en Render)
 database_url = os.environ.get("DATABASE_URL")
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
@@ -16,11 +15,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Carpeta base para guardar imágenes
 BASE_UPLOAD_FOLDER = 'static/uploads'
 app.config['BASE_UPLOAD_FOLDER'] = BASE_UPLOAD_FOLDER
 
-# Función que lee directamente el archivo config.json en tiempo real
 def cargar_config():
     try:
         with open('config.json', 'r', encoding='utf-8') as f:
@@ -34,7 +31,6 @@ def cargar_config():
             "color_primario": "#d97706"
         }
 
-# Modelo de la base de datos para los productos
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
@@ -45,29 +41,24 @@ class Producto(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/')
+# Ruta principal que maneja tanto la vista como la actualización de color por POST
+@app.route('/', methods=['GET', 'POST'])
 def index():
     config = cargar_config()
-    productos = Producto.query.all()
-    return render_template('panel.html', config=config, productos=productos)
-
-# Ruta blindada para actualizar la configuración sin errores de método
-@app.route('/actualizar_config', methods=['GET', 'POST'])
-def actualizar_config():
+    
     if request.method == 'POST':
         nuevo_color = request.form.get('color_primario')
-        config = cargar_config()
-        
         if nuevo_color:
             config['color_primario'] = nuevo_color
-            
-        try:
-            with open('config.json', 'w', encoding='utf-8') as f:
-                json.dump(config, f, ensure_ascii=False, indent=4)
-        except Exception as e:
-            print(f"Error guardando config.json: {e}")
-            
-    return redirect(url_for('index'))
+            try:
+                with open('config.json', 'w', encoding='utf-8') as f:
+                    json.dump(config, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                print(f"Error guardando config.json: {e}")
+        return redirect(url_for('index'))
+
+    productos = Producto.query.all()
+    return render_template('panel.html', config=config, productos=productos)
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
