@@ -138,13 +138,13 @@
             <p style="font-size: 0.8rem; color: #888; margin: 0;">Escanea para abrir el catálogo digital:</p>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://qr-catalogo-maestro-jenopro.onrender.com/catalogo" alt="QR Catálogo">
             <div>
-                <a href="/catalogo" target="_blank" class="btn-link">🔗 Abrir Catálogo Público</a>
+                <a href="{{ url_for('catalogo') }}" target="_blank" class="btn-link">🔗 Abrir Catálogo Público</a>
             </div>
         </div>
 
-        <!-- FORMULARIO PARA AGREGAR PRODUCTOS -->
+        <!-- FORMULARIO PARA AGREGAR PRODUCTOS CON URL_FOR DIRECTO -->
         <div class="section-title">+ Agregar Producto / Artículo</div>
-        <form action="/agregar" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('agregar') }}" method="POST" enctype="multipart/form-data">
             <label for="nombre">Nombre del producto</label>
             <input type="text" id="nombre" name="nombre" required placeholder="Ej. Perfume Sauvage">
 
@@ -169,7 +169,7 @@
                     <strong>{{ prod.nombre }}</strong>
                     <span style="color: #4ade80;">${{ "%.2f"|format(prod.precio) }} MXN</span>
                 </div>
-                <form action="/eliminar/{{ prod.id }}" method="POST" style="margin:0;">
+                <form action="{{ url_for('eliminar', id=prod.id) }}" method="POST" style="margin:0;">
                     <button type="submit" class="btn-delete" onclick="return confirm('¿Borrar este producto?');">Eliminar</button>
                 </form>
             </div>
