@@ -16,10 +16,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Carpeta para guardar imágenes de los productos
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Carpeta base para guardar imágenes
+BASE_UPLOAD_FOLDER = 'static/uploads'
+app.config['BASE_UPLOAD_FOLDER'] = BASE_UPLOAD_FOLDER
 
 # Función que lee directamente el archivo config.json en tiempo real
 def cargar_config():
@@ -54,6 +53,13 @@ def index():
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
+    config = cargar_config()
+    # Limpiamos el nombre del negocio para usarlo como carpeta segura (ej. "Perfumes Europeos" -> "perfumes_europeos")
+    nombre_carpeta = ''.join(c if c.isalnum() else '_' for c in config.get("nombre_negocio", "default").lower())
+    
+    upload_folder = os.path.join(app.config['BASE_UPLOAD_FOLDER'], nombre_carpeta)
+    os.makedirs(upload_folder, exist_ok=True)
+
     nombre = request.form.get('nombre')
     precio = request.form.get('precio')
     descripcion = request.form.get('descripcion')
@@ -62,8 +68,9 @@ def agregar():
     imagen_path = None
     if imagen_file and imagen_file.filename != '':
         filename = secure_filename(imagen_file.filename)
-        imagen_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        imagen_path = f'uploads/{filename}'
+        imagen_file.save(os.path.join(upload_folder, filename))
+        # Guardamos la ruta relativa incluyendo la subcarpeta del negocio
+        imagen_path = f'uploads/{nombre_carpeta}/{filename}'
         
     try:
         nuevo_prod = Producto(
@@ -82,6 +89,15 @@ def agregar():
 @app.route('/eliminar/<int:id>', methods=['POST'])
 def eliminar(id):
     prod = Producto.query.get_or_404(id)
+    # Opcional: si quieres borrar el archivo físico de la imagen al eliminar el producto
+    if prod.imagen:
+        try:
+            ruta_fisica = os.path.join('static', prod.imagen)
+            if os.path.exists(ruta_fisica):
+                os.remove(ruta_fisica)
+        except Exception as e:
+            print(f"Error borrando archivo: {e}")
+            
     db.session.delete(prod)
     db.session.commit()
     return redirect(url_for('index'))
