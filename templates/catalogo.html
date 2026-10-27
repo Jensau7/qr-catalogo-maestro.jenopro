@@ -64,13 +64,56 @@
             color: #aaa;
             margin-bottom: 15px;
         }
+        /* Estilos para el selector de cantidad */
+        .quantity-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background-color: #2a2a2a;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .quantity-container label {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .qty-btn {
+            background-color: #444;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .qty-btn:active {
+            background-color: {{ config.color_primario }};
+        }
+        .qty-input {
+            width: 35px;
+            text-align: center;
+            background-color: #1e1e1e;
+            border: 1px solid #555;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 4px;
+        }
         .btn-whatsapp {
             display: block;
             width: 100%;
             background-color: #25d366;
             color: white;
             text-align: center;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
@@ -96,14 +139,30 @@
                 {% endif %}
                 <div class="product-details">
                     <div class="product-title">{{ prod.nombre }}</div>
-                    <div class="product-price">${{ "%.2f"|format(prod.precio) }} MXN</div>
+                    <div class="product-price" id="precio-unitario-{{ prod.id }}" data-precio="{{ prod.precio }}">
+                        ${{ "%.2f"|format(prod.precio) }} MXN
+                    </div>
                     {% if prod.descripcion %}
                         <div class="product-desc">{{ prod.descripcion }}</div>
                     {% endif %}
                     
-                    <!-- Botón para pedir por WhatsApp con el mensaje personalizado -->
-                    <a href="https://api.whatsapp.com/send?phone={{ config.telefono_whatsapp }}&text=Hola,%20me%20interesa%20el%20producto:%20{{ prod.nombre }}%20(${% if prod.precio %}{{ prod.precio }}{% endif %})" target="_blank" class="btn-whatsapp">
-                        💬 Pedir por WhatsApp
+                    <!-- Selector de Cantidad -->
+                    <div class="quantity-container">
+                        <label for="qty-{{ prod.id }}">Cantidad:</label>
+                        <div class="quantity-controls">
+                            <button type="button" class="qty-btn" onclick="cambiarCantidad({{ prod.id }}, -1)">-</button>
+                            <input type="text" id="qty-{{ prod.id }}" class="qty-input" value="1" readonly>
+                            <button type="button" class="qty-btn" onclick="cambiarCantidad({{ prod.id }}, 1)">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Botón dinámico de WhatsApp -->
+                    <a href="#" id="whatsapp-btn-{{ prod.id }}" 
+                       data-nombre="{{ prod.nombre }}" 
+                       data-precio="{{ prod.precio }}" 
+                       data-telefono="{{ config.telefono_whatsapp }}" 
+                       class="btn-whatsapp" target="_blank" onclick="prepararMensaje(event, {{ prod.id }})">
+                        💬 Pedir por WhatsApp (<span id="total-txt-{{ prod.id }}">${{ "%.2f"|format(prod.precio) }}</span>)
                     </a>
                 </div>
             </div>
@@ -112,6 +171,42 @@
             <p style="text-align: center; color: #666;">Por el momento no hay productos disponibles.</p>
         {% endif %}
     </div>
+
+    <script>
+        function cambiarCantidad(id, cambio) {
+            let input = document.getElementById('qty-' + id);
+            let valorActual = parseInt(input.value);
+            let nuevoValor = valorActual + cambio;
+            
+            if (nuevoValor >= 1) {
+                input.value = nuevoValor;
+                actualizarTotal(id);
+            }
+        }
+
+        function actualizarTotal(id) {
+            let input = document.getElementById('qty-' + id);
+            let cantidad = parseInt(input.value);
+            let precioUnitario = parseFloat(document.getElementById('precio-unitario-' + id).getAttribute('data-precio'));
+            let total = cantidad * precioUnitario;
+            
+            document.getElementById('total-txt-' + id).innerText = '$' + total.toFixed(2);
+        }
+
+        function prepararMensaje(event, id) {
+            let cantidad = document.getElementById('qty-' + id).value;
+            let btn = document.getElementById('whatsapp-btn-' + id);
+            let nombre = btn.getAttribute('data-nombre');
+            let precioUnitario = parseFloat(btn.getAttribute('data-precio'));
+            let telefono = btn.getAttribute('data-telefono');
+            let total = (cantidad * precioUnitario).toFixed(2);
+
+            let texto = `Hola, me interesa hacer un pedido:\n\n*Producto:* ${nombre}\n*Cantidad:* ${cantidad}\n*Total a pagar:* $${total} MXN`;
+            let urlWp = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(texto)}`;
+            
+            btn.href = urlWp;
+        }
+    </script>
 
 </body>
 </html>
